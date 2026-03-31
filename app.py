@@ -8,10 +8,11 @@ CORS(app)
 
 def get_db():
     return mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="",
-        database="medical_vending_db"
+        host=os.environ.get('DB_HOST', 'localhost'),
+        port=int(os.environ.get ('DB_PORT', 59246)),
+        user=os.environ.get('DB_USER', 'root'),
+        password=os.environ.get('DB_PASSWORD', ' '),
+        database=os.environ.get ('DB_NAME', 'medical_vending_db')
     )
 
 @app.route('/verify-rfid/<rfid_uid>', methods=['GET'])
