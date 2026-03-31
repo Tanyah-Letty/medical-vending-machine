@@ -3,11 +3,39 @@ from flask_cors import CORS
 import mysql.connector
 from datetime import datetime
 import os
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+# Email config
+SENDER_EMAIL = "tanyahletty01@gmail.com"
+SENDER_PASSWORD = os.environ.get('onfq asdu uteh kdig')
+PHARMACIST_EMAILS = [
+    "lettytanyah01@gmail.com",
+    "Staiceymurandu6@gmail.com",
+    "Chivimadian@gmail.com"
+]
 
 app = Flask(__name__)
 CORS(app)
 
 def get_db():
+   def send_email(subject, body):
+    try:
+        msg = MIMEMultipart()
+        msg['From'] = SENDER_EMAIL
+        msg['To'] = ", ".join(PHARMACIST_EMAILS)
+        msg['Subject'] = subject
+        msg.attach(MIMEText(body, 'plain'))
+
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(SENDER_EMAIL, SENDER_PASSWORD)
+        server.sendmail(SENDER_EMAIL, PHARMACIST_EMAILS, msg.as_string())
+        server.quit()
+        print("Email sent successfully")
+    except Exception as e:
+        print(f"Email failed: {e}")
     return mysql.connector.connect(
          host=os.environ.get('DB_HOST', 'localhost'),
         port=int(os.environ.get ('DB_PORT', 59246)),
@@ -184,6 +212,10 @@ def dispense_prescription():
               data['machine_id']))
 
         db.commit()
+        send_email(
+            "Medication Dispensed - Medical Vending Mchine",
+         f"A dispense event occurred.\n\nPrescription ID: {data['prescription_id']}\nPatient ID: {data['patient_id']}\nMedication ID: {data['medication_id']}\nQuantity: {data['quantity']}\nTime: {datetime.now()}"
+)
         return jsonify({
             "status": "success",
             "message": "Dispensed successfully"
@@ -244,7 +276,14 @@ def get_alerts():
             WHERE a.is_resolved = FALSE
             ORDER BY a.created_at DESC
         """)
-        return jsonify(cursor.fetchall())
+        alerts = cursor.fetchall()
+if len(alerts) > 0:
+    alert_list = "\n".join([f"- {a['brand_name']}: {a['current_quantity']} remaining (reorder at {a['reorder_level']})" for a in alerts])
+    send_email(
+        "LOW STOCK ALERT - Medical Vending Machine",
+        f"The following medications need restocking:\n\n{alert_list}\n\nPlease restock as soon as possible."
+    )
+return jsonify(alerts)
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
     finally:
