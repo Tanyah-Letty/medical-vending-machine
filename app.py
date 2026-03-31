@@ -41,12 +41,12 @@ def verify_rfid(rfid_uid):
                 pt.patient_id,
                 pt.hospital_id,
                 d.full_name as doctor_name
-            FROM Prescription p
-            JOIN Patient pt ON p.patient_id = pt.patient_id
-            JOIN Medication m ON p.medication_id = m.medication_id
-            JOIN Inventory i ON i.medication_id = m.medication_id
+            FROM prescription p
+            JOIN patient pt ON p.patient_id = pt.patient_id
+            JOIN medication m ON p.medication_id = m.medication_id
+            JOIN inventory i ON i.medication_id = m.medication_id
                 AND i.machine_id = 1
-            JOIN Doctor d ON p.doctor_id = d.doctor_id
+            JOIN doctor d ON p.doctor_id = d.doctor_id
             WHERE pt.rfid_uid = %s
               AND p.status = 'pending'
               AND p.date_expires >= CURDATE()
@@ -63,10 +63,10 @@ def verify_rfid(rfid_uid):
         cursor.execute("""
             SELECT pt.first_name, pt.last_name, p.status,
                    p.date_expires, i.quantity_available
-            FROM Patient pt
-            LEFT JOIN Prescription p ON pt.patient_id = p.patient_id
-            LEFT JOIN Medication m ON p.medication_id = m.medication_id
-            LEFT JOIN Inventory i ON i.medication_id = m.medication_id
+            FROM patient pt
+            LEFT JOIN prescription p ON pt.patient_id = p.patient_id
+            LEFT JOIN medication m ON p.medication_id = m.medication_id
+            LEFT JOIN inventory i ON i.medication_id = m.medication_id
             WHERE pt.rfid_uid = %s
             LIMIT 1
         """, (rfid_uid,))
@@ -112,11 +112,11 @@ def verify_barcode(barcode):
                 i.slot_number,
                 pt.first_name,
                 pt.last_name
-            FROM Prescription p
-            JOIN Medication m ON p.medication_id = m.medication_id
-            JOIN Inventory i ON i.medication_id = m.medication_id
+            FROM prescription p
+            JOIN medication m ON p.medication_id = m.medication_id
+            JOIN inventory i ON i.medication_id = m.medication_id
                 AND i.machine_id = 1
-            JOIN Patient pt ON p.patient_id = pt.patient_id
+            JOIN patient pt ON p.patient_id = pt.patient_id
             WHERE p.barcode = %s
               AND p.status = 'pending'
               AND p.date_expires >= CURDATE()
@@ -141,7 +141,7 @@ def dispense_prescription():
     cursor = db.cursor()
     try:
         cursor.execute("""
-            INSERT INTO Prescription_Transaction
+            INSERT INTO prescription_transaction
             (prescription_id, patient_id, medication_id,
              machine_id, barcode_scanned,
              quantity_dispensed, status)
@@ -152,7 +152,7 @@ def dispense_prescription():
 
         cursor.execute("""
             SELECT refills_allowed, refills_used
-            FROM Prescription
+            FROM prescription
             WHERE prescription_id = %s
         """, (data['prescription_id'],))
         rx = cursor.fetchone()
@@ -161,7 +161,7 @@ def dispense_prescription():
 
         if refills_used >= rx[0]:
             cursor.execute("""
-                UPDATE Prescription
+                UPDATE prescription
                 SET status = 'dispensed',
                     refills_used = %s
                 WHERE prescription_id = %s
@@ -169,7 +169,7 @@ def dispense_prescription():
             print("Prescription fully dispensed")
         else:
             cursor.execute("""
-                UPDATE Prescription
+                UPDATE prescription
                 SET refills_used = %s
                 WHERE prescription_id = %s
             """, (refills_used, data['prescription_id']))
@@ -177,7 +177,7 @@ def dispense_prescription():
                   str(rx[0] - refills_used))
 
         cursor.execute("""
-            UPDATE Inventory
+            UPDATE inventory
             SET quantity_available = quantity_available - %s
             WHERE medication_id = %s AND machine_id = %s
         """, (data['quantity'], data['medication_id'],
@@ -213,8 +213,8 @@ def get_inventory():
                 m.dosage_strength,
                 m.drug_type,
                 m.unit_price
-            FROM Inventory i
-            JOIN Medication m ON i.medication_id = m.medication_id
+            FROM inventory i
+            JOIN medication m ON i.medication_id = m.medication_id
             WHERE i.machine_id = 1
             ORDER BY i.slot_number
         """)
@@ -239,8 +239,8 @@ def get_alerts():
                 a.alert_message,
                 a.created_at,
                 m.brand_name
-            FROM Alert a
-            JOIN Medication m ON a.medication_id = m.medication_id
+            FROM alert a
+            JOIN medication m ON a.medication_id = m.medication_id
             WHERE a.is_resolved = FALSE
             ORDER BY a.created_at DESC
         """)
@@ -258,7 +258,7 @@ def restock():
     cursor = db.cursor()
     try:
         cursor.execute("""
-            SELECT quantity_available FROM Inventory
+            SELECT quantity_available FROM inventory
             WHERE inventory_id = %s
         """, (data['inventory_id'],))
         row = cursor.fetchone()
@@ -266,7 +266,7 @@ def restock():
         qty_after = qty_before + data['quantity_added']
 
         cursor.execute("""
-            INSERT INTO Restock_Log
+            INSERT INTO restock_log
             (inventory_id, staff_id, quantity_added,
              quantity_before, quantity_after, new_expiry_date)
             VALUES (%s, %s, %s, %s, %s, %s)
@@ -275,7 +275,7 @@ def restock():
               qty_after, data['new_expiry_date']))
 
         cursor.execute("""
-            UPDATE Inventory
+            UPDATE inventory
             SET quantity_available = %s,
                 expiry_date = %s,
                 last_restocked_date = CURDATE(),
@@ -285,7 +285,7 @@ def restock():
               data['staff_id'], data['inventory_id']))
 
         cursor.execute("""
-            UPDATE Alert
+            UPDATE alert
             SET is_resolved = TRUE,
                 resolved_at = NOW(),
                 resolved_by = %s
@@ -312,26 +312,26 @@ def get_stats():
     cursor = db.cursor(dictionary=True)
     try:
         cursor.execute(
-            "SELECT COUNT(*) as total FROM Medication "
+            "SELECT COUNT(*) as total FROM medication "
             "WHERE is_active = TRUE"
         )
         total_meds = cursor.fetchone()['total']
 
         cursor.execute("""
-            SELECT COUNT(*) as total FROM Inventory
+            SELECT COUNT(*) as total FROM inventory
             WHERE quantity_available <= reorder_level
         """)
         low_stock = cursor.fetchone()['total']
 
         cursor.execute("""
-            SELECT COUNT(*) as total FROM Inventory
+            SELECT COUNT(*) as total FROM inventory
             WHERE quantity_available = 0
         """)
         out_of_stock = cursor.fetchone()['total']
 
         cursor.execute("""
             SELECT COUNT(*) as total
-            FROM Prescription_Transaction
+            FROM prescription_transaction
             WHERE DATE(dispensed_at) = CURDATE()
             AND status = 'success'
         """)
@@ -363,9 +363,9 @@ def recent_transactions():
                 t.quantity_dispensed as quantity,
                 t.dispensed_at,
                 t.status
-            FROM Prescription_Transaction t
-            JOIN Patient pt ON t.patient_id = pt.patient_id
-            JOIN Medication m ON t.medication_id = m.medication_id
+            FROM prescription_transaction t
+            JOIN patient pt ON t.patient_id = pt.patient_id
+            JOIN medication m ON t.medication_id = m.medication_id
             ORDER BY t.dispensed_at DESC
             LIMIT 15
         """)
@@ -384,7 +384,7 @@ def get_patients():
         cursor.execute("""
             SELECT patient_id, first_name,
                    last_name, hospital_id
-            FROM Patient ORDER BY first_name
+            FROM patient ORDER BY first_name
         """)
         return jsonify(cursor.fetchall())
     except Exception as e:
@@ -401,7 +401,7 @@ def get_doctors():
         cursor.execute("""
             SELECT doctor_id, full_name,
                    specialization, hospital_department
-            FROM Doctor
+            FROM doctor
             WHERE is_active = TRUE
             ORDER BY full_name
         """)
@@ -421,7 +421,7 @@ def prescription_drugs():
             SELECT medication_id, brand_name,
                    generic_name, dosage_strength,
                    dosage_form, unit_price
-            FROM Medication
+            FROM medication
             WHERE drug_type = 'prescription'
               AND is_active = TRUE
             ORDER BY brand_name
@@ -440,14 +440,14 @@ def create_prescription():
     cursor = db.cursor(dictionary=True)
     try:
         cursor.execute(
-            "SELECT COUNT(*) as total FROM Prescription"
+            "SELECT COUNT(*) as total FROM prescription"
         )
         count = cursor.fetchone()['total']
         barcode = ("RX-" + str(datetime.now().year) +
                    "-" + str(count + 1).zfill(5))
 
         cursor.execute("""
-            INSERT INTO Prescription
+            INSERT INTO prescription
             (barcode, patient_id, doctor_id,
              medication_id, dosage_instructions,
              quantity_prescribed, refills_allowed,
@@ -472,10 +472,10 @@ def create_prescription():
                 pt.hospital_id,
                 m.brand_name, m.dosage_strength,
                 d.full_name as doctor_name
-            FROM Prescription p
-            JOIN Patient pt ON p.patient_id = pt.patient_id
-            JOIN Medication m ON p.medication_id = m.medication_id
-            JOIN Doctor d ON p.doctor_id = d.doctor_id
+            FROM prescription p
+            JOIN patient pt ON p.patient_id = pt.patient_id
+            JOIN medication m ON p.medication_id = m.medication_id
+            JOIN doctor d ON p.doctor_id = d.doctor_id
             WHERE p.barcode = %s
         """, (barcode,))
         prescription = cursor.fetchone()
