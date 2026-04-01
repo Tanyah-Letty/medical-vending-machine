@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,28 +9,23 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.5/JsBarcode.all.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
     body {
       font-family: Arial, sans-serif;
       background: #f0f4f8;
       min-height: 100vh;
     }
-
     header {
       background: #1a73e8;
       color: white;
       padding: 15px 30px;
     }
-
     header h1 { font-size: 22px; }
     header p  { font-size: 13px; opacity: 0.85; }
-
     .container {
       max-width: 800px;
       margin: 30px auto;
       padding: 0 20px;
     }
-
     .card {
       background: white;
       border-radius: 10px;
@@ -36,7 +33,6 @@
       box-shadow: 0 2px 10px rgba(0,0,0,0.08);
       margin-bottom: 25px;
     }
-
     .card h2 {
       font-size: 18px;
       color: #1a73e8;
@@ -44,29 +40,24 @@
       padding-bottom: 10px;
       border-bottom: 2px solid #e8f0fe;
     }
-
     .form-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 15px;
     }
-
     .form-group {
       display: flex;
       flex-direction: column;
       gap: 6px;
     }
-
     .form-group.full-width {
       grid-column: 1 / -1;
     }
-
     label {
       font-size: 13px;
       font-weight: bold;
       color: #444;
     }
-
     select, input, textarea {
       padding: 10px 12px;
       border: 1px solid #ddd;
@@ -75,15 +66,12 @@
       width: 100%;
       background: #fafafa;
     }
-
     select:focus, input:focus, textarea:focus {
       outline: none;
       border-color: #1a73e8;
       background: white;
     }
-
     textarea { resize: vertical; min-height: 70px; }
-
     .btn {
       padding: 12px 25px;
       border: none;
@@ -92,25 +80,20 @@
       cursor: pointer;
       font-weight: bold;
     }
-
     .btn-primary {
       background: #1a73e8;
       color: white;
       width: 100%;
       margin-top: 10px;
     }
-
     .btn-primary:hover { background: #1557b0; }
-
     .btn-print {
       background: #34a853;
       color: white;
       margin-top: 15px;
     }
-
     #result-card { display: none; text-align: center; }
     #result-card h2 { color: #34a853; }
-
     .prescription-info {
       background: #f8f9fa;
       border-radius: 8px;
@@ -118,18 +101,15 @@
       margin: 15px 0;
       text-align: left;
     }
-
     .prescription-info p {
       font-size: 14px;
       margin-bottom: 6px;
       color: #333;
     }
-
     .prescription-info span {
       font-weight: bold;
       color: #1a73e8;
     }
-
     #barcode-container {
       margin: 20px auto;
       padding: 20px;
@@ -138,7 +118,6 @@
       border-radius: 8px;
       display: inline-block;
     }
-
     .barcode-label {
       font-size: 18px;
       font-weight: bold;
@@ -146,7 +125,6 @@
       margin-top: 8px;
       letter-spacing: 3px;
     }
-
     .error-msg {
       background: #fce8e6;
       color: #d93025;
@@ -156,7 +134,6 @@
       display: none;
       font-size: 14px;
     }
-
     @media print {
       header, .card:first-of-type, .btn-print { display: none; }
       #result-card { display: block !important; }
@@ -165,71 +142,57 @@
   </style>
 </head>
 <body>
-
 <header>
   <h1>🏥 Doctor Prescription Portal</h1>
   <p>Medical Vending Machine System</p>
 </header>
-
 <div class="container">
-
   <!-- Prescription Form -->
   <div class="card">
     <h2>📋 Issue New Prescription</h2>
     <div class="form-grid">
-
       <div class="form-group">
         <label>Doctor</label>
         <select id="doctor-select">
           <option value="">-- Select Doctor --</option>
         </select>
       </div>
-
       <div class="form-group">
         <label>Patient</label>
         <select id="patient-select">
           <option value="">-- Select Patient --</option>
         </select>
       </div>
-
       <div class="form-group">
         <label>Medication</label>
         <select id="medication-select">
           <option value="">-- Select Medication --</option>
         </select>
       </div>
-
       <div class="form-group">
         <label>Quantity to Dispense</label>
         <input type="number" id="quantity" placeholder="e.g. 21" min="1">
       </div>
-
       <div class="form-group full-width">
         <label>Dosage Instructions</label>
-        <textarea id="dosage" 
+        <textarea id="dosage"
           placeholder="e.g. Take 1 tablet twice daily after meals">
         </textarea>
       </div>
-
       <div class="form-group">
         <label>Refills Allowed</label>
         <input type="number" id="refills" value="0" min="0" max="5">
       </div>
-
       <div class="form-group">
         <label>Prescription Expires On</label>
         <input type="date" id="expiry">
       </div>
-
     </div>
-
     <div class="error-msg" id="error-msg"></div>
-
     <button class="btn btn-primary" onclick="generatePrescription()">
       Generate Prescription &amp; Barcode
     </button>
   </div>
-
   <!-- Barcode Result -->
   <div class="card" id="result-card">
     <h2>✅ Prescription Generated Successfully</h2>
@@ -243,24 +206,19 @@
       🖨️ Print Barcode for Patient
     </button>
   </div>
-
 </div>
-
 <script>
-  const API ='https://medical-vending-machine-api.onrender.com';
-
+  const API = 'https://medical-vending-machine-api.onrender.com';
   // ── Set default expiry date (7 days from today) ──
   window.onload = function() {
     var expiry = new Date();
     expiry.setDate(expiry.getDate() + 7);
     var formatted = expiry.toISOString().split('T')[0];
     document.getElementById('expiry').value = formatted;
-
     loadDoctors();
     loadPatients();
     loadMedications();
   };
-
   // ── Load Doctors ─────────────────────────────────
   function loadDoctors() {
     fetch(API + '/doctors')
@@ -278,7 +236,6 @@
         console.error('Failed to load doctors:', err);
       });
   }
-
   // ── Load Patients ────────────────────────────────
   function loadPatients() {
     fetch(API + '/patients')
@@ -288,7 +245,7 @@
         patients.forEach(function(p) {
           var option = document.createElement('option');
           option.value = p.patient_id;
-          option.textContent = p.first_name + ' ' + p.last_name + 
+          option.textContent = p.first_name + ' ' + p.last_name +
                                ' (' + p.hospital_id + ')';
           select.appendChild(option);
         });
@@ -297,7 +254,6 @@
         console.error('Failed to load patients:', err);
       });
   }
-
   // ── Load Medications ─────────────────────────────
   function loadMedications() {
     fetch(API + '/prescription-drugs')
@@ -307,7 +263,7 @@
         drugs.forEach(function(m) {
           var option = document.createElement('option');
           option.value = m.medication_id;
-          option.textContent = m.brand_name + ' ' + 
+          option.textContent = m.brand_name + ' ' +
                                m.dosage_strength + ' - ' + m.dosage_form;
           select.appendChild(option);
         });
@@ -316,12 +272,10 @@
         console.error('Failed to load medications:', err);
       });
   }
-
   // ── Generate Prescription ────────────────────────
   function generatePrescription() {
     var errorDiv = document.getElementById('error-msg');
     errorDiv.style.display = 'none';
-
     var doctor_id     = document.getElementById('doctor-select').value;
     var patient_id    = document.getElementById('patient-select').value;
     var medication_id = document.getElementById('medication-select').value;
@@ -329,15 +283,13 @@
     var dosage        = document.getElementById('dosage').value.trim();
     var refills       = document.getElementById('refills').value;
     var expiry        = document.getElementById('expiry').value;
-
     // Validate all fields
-    if (!doctor_id || !patient_id || !medication_id || 
+    if (!doctor_id || !patient_id || !medication_id ||
         !quantity || !dosage || !expiry) {
       errorDiv.textContent = 'Please fill in all fields before generating.';
       errorDiv.style.display = 'block';
       return;
     }
-
     fetch(API + '/create-prescription', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -361,12 +313,11 @@
       }
     })
     .catch(function(err) {
-      errorDiv.textContent = 
+      errorDiv.textContent =
         'Cannot connect to server. Make sure Flask is running.';
       errorDiv.style.display = 'block';
     });
   }
-
   // ── Show Barcode ─────────────────────────────────
   function showBarcode(p) {
     JsBarcode('#barcode', p.barcode, {
@@ -375,9 +326,7 @@
       height: 80,
       displayValue: false
     });
-
     document.getElementById('barcode-text').textContent = p.barcode;
-
     // Format dates cleanly
     function formatDate(dateStr) {
       var d = new Date(dateStr);
@@ -387,27 +336,24 @@
         year: 'numeric'
       });
     }
-
     document.getElementById('prescription-info').innerHTML =
       '<p>🔖 <span>Barcode:</span> ' + p.barcode + '</p>' +
-      '<p>👤 <span>Patient:</span> ' + p.first_name + ' ' + 
+      '<p>👤 <span>Patient:</span> ' + p.first_name + ' ' +
           p.last_name + ' (' + p.hospital_id + ')</p>' +
-      '<p>💊 <span>Medication:</span> ' + p.brand_name + 
+      '<p>💊 <span>Medication:</span> ' + p.brand_name +
           ' ' + p.dosage_strength + '</p>' +
-      '<p>📋 <span>Instructions:</span> ' + 
+      '<p>📋 <span>Instructions:</span> ' +
           p.dosage_instructions + '</p>' +
-      '<p>🔢 <span>Quantity:</span> ' + 
+      '<p>🔢 <span>Quantity:</span> ' +
           p.quantity_prescribed + ' units</p>' +
       '<p>👨‍⚕️ <span>Doctor:</span> ' + p.doctor_name + '</p>' +
       '<p>📅 <span>Issued:</span> ' + formatDate(p.date_issued) + '</p>' +
       '<p>⏰ <span>Expires:</span> ' + formatDate(p.date_expires) + '</p>';
-
     document.getElementById('result-card').style.display = 'block';
-    document.getElementById('result-card').scrollIntoView({ 
-      behavior: 'smooth' 
+    document.getElementById('result-card').scrollIntoView({
+      behavior: 'smooth'
     });
   }
 </script>
-
 </body>
 </html>

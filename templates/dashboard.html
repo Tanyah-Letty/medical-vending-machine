@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,13 +8,11 @@
   <title>Pharmacist Dashboard</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
     body {
       font-family: Arial, sans-serif;
       background: #f0f4f8;
       min-height: 100vh;
     }
-
     /* ── Header ── */
     header {
       background: #1a6e3c;
@@ -22,23 +22,19 @@
       justify-content: space-between;
       align-items: center;
     }
-
     header h1 { font-size: 20px; }
     header p  { font-size: 12px; opacity: 0.85; }
-
     .header-right {
       font-size: 13px;
       opacity: 0.9;
       text-align: right;
     }
-
     /* ── Layout ── */
     .container {
       max-width: 1100px;
       margin: 25px auto;
       padding: 0 20px;
     }
-
     /* ── Stat Cards ── */
     .stats-grid {
       display: grid;
@@ -46,7 +42,6 @@
       gap: 15px;
       margin-bottom: 25px;
     }
-
     .stat-card {
       background: white;
       border-radius: 10px;
@@ -56,7 +51,6 @@
       align-items: center;
       gap: 15px;
     }
-
     .stat-icon {
       font-size: 32px;
       width: 55px;
@@ -66,26 +60,22 @@
       align-items: center;
       justify-content: center;
     }
-
     .stat-icon.blue   { background: #e8f0fe; }
     .stat-icon.red    { background: #fce8e6; }
     .stat-icon.green  { background: #e6f4ea; }
     .stat-icon.orange { background: #fff3e0; }
     .stat-icon.purple { background: #f3e8fd; }
     .stat-icon.teal   { background: #e0f7f4; }
-
     .stat-info h3 {
       font-size: 26px;
       font-weight: bold;
       color: #333;
     }
-
     .stat-info p {
       font-size: 12px;
       color: #777;
       margin-top: 2px;
     }
-
     /* ── Section Cards ── */
     .card {
       background: white;
@@ -94,7 +84,6 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.07);
       margin-bottom: 20px;
     }
-
     .card-header {
       display: flex;
       justify-content: space-between;
@@ -103,12 +92,10 @@
       padding-bottom: 12px;
       border-bottom: 2px solid #f0f0f0;
     }
-
     .card-header h2 {
       font-size: 16px;
       color: #1a6e3c;
     }
-
     .badge {
       background: #fce8e6;
       color: #d93025;
@@ -117,19 +104,16 @@
       font-size: 12px;
       font-weight: bold;
     }
-
     .badge.green {
       background: #e6f4ea;
       color: #1e8e3e;
     }
-
     /* ── Tables ── */
     table {
       width: 100%;
       border-collapse: collapse;
       font-size: 13px;
     }
-
     th {
       background: #f8f9fa;
       padding: 10px 12px;
@@ -138,15 +122,12 @@
       color: #555;
       border-bottom: 2px solid #eee;
     }
-
     td {
       padding: 10px 12px;
       border-bottom: 1px solid #f0f0f0;
       color: #333;
     }
-
     tr:hover td { background: #f9f9f9; }
-
     .stock-bar-wrap {
       background: #eee;
       border-radius: 10px;
@@ -154,17 +135,14 @@
       width: 100px;
       overflow: hidden;
     }
-
     .stock-bar {
       height: 8px;
       border-radius: 10px;
       transition: width 0.3s;
     }
-
     .stock-ok      { background: #34a853; }
     .stock-low     { background: #fbbc04; }
     .stock-critical{ background: #ea4335; }
-
     /* ── Alert Items ── */
     .alert-item {
       display: flex;
@@ -175,28 +153,23 @@
       margin-bottom: 10px;
       border-left: 4px solid;
     }
-
     .alert-low {
       background: #fff8e1;
       border-color: #fbbc04;
     }
-
     .alert-out {
       background: #fce8e6;
       border-color: #ea4335;
     }
-
-    .alert-item .alert-info h4 { 
-      font-size: 14px; 
-      color: #333; 
+    .alert-item .alert-info h4 {
+      font-size: 14px;
+      color: #333;
     }
-
-    .alert-item .alert-info p  { 
-      font-size: 12px; 
-      color: #777; 
-      margin-top: 2px; 
+    .alert-item .alert-info p  {
+      font-size: 12px;
+      color: #777;
+      margin-top: 2px;
     }
-
     /* ── Restock Form ── */
     .restock-grid {
       display: grid;
@@ -204,7 +177,6 @@
       gap: 10px;
       align-items: end;
     }
-
     .form-group label {
       display: block;
       font-size: 12px;
@@ -212,7 +184,6 @@
       color: #555;
       margin-bottom: 5px;
     }
-
     .form-group select,
     .form-group input {
       width: 100%;
@@ -222,7 +193,6 @@
       font-size: 13px;
       background: #fafafa;
     }
-
     .btn {
       padding: 9px 18px;
       border: none;
@@ -231,15 +201,12 @@
       cursor: pointer;
       font-weight: bold;
     }
-
     .btn-green {
       background: #1a6e3c;
       color: white;
       white-space: nowrap;
     }
-
     .btn-green:hover { background: #145c31; }
-
     /* ── Transaction type tags ── */
     .tag {
       padding: 3px 8px;
@@ -247,13 +214,10 @@
       font-size: 11px;
       font-weight: bold;
     }
-
     .tag-rx  { background: #e8f0fe; color: #1a73e8; }
     .tag-otc { background: #e6f4ea; color: #1a6e3c; }
-
     .status-ok   { color: #1a6e3c; font-weight: bold; }
     .status-fail { color: #d93025; font-weight: bold; }
-
     /* ── Empty state ── */
     .empty {
       text-align: center;
@@ -261,7 +225,6 @@
       color: #aaa;
       font-size: 14px;
     }
-
     /* ── Success/Error messages ── */
     .msg {
       padding: 10px 15px;
@@ -270,10 +233,8 @@
       font-size: 13px;
       display: none;
     }
-
     .msg-success { background: #e6f4ea; color: #1e8e3e; }
     .msg-error   { background: #fce8e6; color: #d93025; }
-
     /* ── Refresh button ── */
     .btn-refresh {
       background: #f0f4f8;
@@ -284,12 +245,10 @@
       font-size: 12px;
       cursor: pointer;
     }
-
     .btn-refresh:hover { background: #e0e8f0; }
   </style>
 </head>
 <body>
-
 <header>
   <div>
     <h1>💊 Pharmacist Dashboard</h1>
@@ -300,9 +259,7 @@
     <div>Machine: Hospital Main Lobby</div>
   </div>
 </header>
-
 <div class="container">
-
   <!-- ── STATS ROW ── -->
   <div class="stats-grid">
     <div class="stat-card">
@@ -348,7 +305,6 @@
       </div>
     </div>
   </div>
-
   <!-- ── ALERTS ── -->
   <div class="card">
     <div class="card-header">
@@ -359,7 +315,6 @@
       <div class="empty">Loading alerts...</div>
     </div>
   </div>
-
   <!-- ── INVENTORY TABLE ── -->
   <div class="card">
     <div class="card-header">
@@ -386,7 +341,6 @@
       </table>
     </div>
   </div>
-
   <!-- ── RESTOCK FORM ── -->
   <div class="card">
     <div class="card-header">
@@ -401,7 +355,7 @@
       </div>
       <div class="form-group">
         <label>Quantity to Add</label>
-        <input type="number" id="restock-qty" 
+        <input type="number" id="restock-qty"
                placeholder="e.g. 50" min="1">
       </div>
       <div class="form-group">
@@ -422,7 +376,6 @@
     <div class="msg msg-success" id="restock-success"></div>
     <div class="msg msg-error"   id="restock-error"></div>
   </div>
-
   <!-- ── RECENT TRANSACTIONS ── -->
   <div class="card">
     <div class="card-header">
@@ -450,12 +403,9 @@
       </table>
     </div>
   </div>
-
 </div>
-
 <script>
-  const API = ''https://medical-vending-machine-api.onrender.com';
-
+  const API = 'https://medical-vending-machine-api.onrender.com';
   // ── Live clock ───────────────────────────────────
   function updateClock() {
     var now = new Date();
@@ -468,7 +418,6 @@
   }
   setInterval(updateClock, 1000);
   updateClock();
-
   // ── Format date ──────────────────────────────────
   function formatDate(dateStr) {
     if (!dateStr) return '--';
@@ -476,7 +425,6 @@
       day: 'numeric', month: 'short', year: 'numeric'
     });
   }
-
   function formatDateTime(dateStr) {
     if (!dateStr) return '--';
     var d = new Date(dateStr);
@@ -486,7 +434,6 @@
       hour: '2-digit', minute: '2-digit'
     });
   }
-
   // ── Load Stats ───────────────────────────────────
   function loadStats() {
     fetch(API + '/stats')
@@ -507,7 +454,6 @@
       })
       .catch(function(e) { console.error('Stats error:', e); });
   }
-
   // ── Load Alerts ──────────────────────────────────
   function loadAlerts() {
     fetch(API + '/alerts')
@@ -521,7 +467,7 @@
         }
         var html = '';
         alerts.forEach(function(a) {
-          var cls = a.alert_type === 'out_of_stock' ? 
+          var cls = a.alert_type === 'out_of_stock' ?
                     'alert-out' : 'alert-low';
           var icon = a.alert_type === 'out_of_stock' ? '🔴' : '🟡';
           html +=
@@ -536,7 +482,6 @@
         container.innerHTML = html;
       });
   }
-
   // ── Load Inventory ───────────────────────────────
   function loadInventory() {
     fetch(API + '/inventory')
@@ -544,16 +489,13 @@
       .then(function(items) {
         var tbody = document.getElementById('inventory-body');
         var slotSelect = document.getElementById('restock-slot');
-
         // Reset slot dropdown
         slotSelect.innerHTML = '<option value="">-- Select Slot --</option>';
-
         if (items.length === 0) {
           tbody.innerHTML =
             '<tr><td colspan="8" class="empty">No inventory found</td></tr>';
           return;
         }
-
         var html = '';
         items.forEach(function(item) {
           var pct = Math.round(
@@ -564,11 +506,10 @@
           var typeTag  = item.drug_type === 'OTC' ?
             '<span class="tag tag-otc">OTC</span>' :
             '<span class="tag tag-rx">RX</span>';
-
           html +=
             '<tr>' +
               '<td><strong>' + item.slot_number + '</strong></td>' +
-              '<td>' + item.brand_name + ' ' + 
+              '<td>' + item.brand_name + ' ' +
                        item.dosage_strength + '</td>' +
               '<td>' + typeTag + '</td>' +
               '<td><strong>' + item.quantity_available + '</strong></td>' +
@@ -583,18 +524,16 @@
               '<td>' + formatDate(item.expiry_date) + '</td>' +
               '<td>$' + parseFloat(item.unit_price).toFixed(2) + '</td>' +
             '</tr>';
-
           // Add to restock dropdown
           slotSelect.innerHTML +=
             '<option value="' + item.inventory_id + '">' +
-              item.slot_number + ' — ' + item.brand_name + 
+              item.slot_number + ' — ' + item.brand_name +
               ' (' + item.quantity_available + ' left)' +
             '</option>';
         });
         tbody.innerHTML = html;
       });
   }
-
   // ── Load Transactions ────────────────────────────
   function loadTransactions() {
     fetch(API + '/recent-transactions')
@@ -615,7 +554,6 @@
             'status-ok' : 'status-fail';
           var amount = t.type === 'OTC' ?
             '$' + parseFloat(t.amount_paid).toFixed(2) : '—';
-
           html +=
             '<tr>' +
               '<td>' + typeTag + '</td>' +
@@ -624,32 +562,28 @@
               '<td>' + t.quantity + '</td>' +
               '<td>' + amount + '</td>' +
               '<td>' + formatDateTime(t.dispensed_at) + '</td>' +
-              '<td class="' + statusCls + '">' + 
+              '<td class="' + statusCls + '">' +
                 t.status.toUpperCase() + '</td>' +
             '</tr>';
         });
         tbody.innerHTML = html;
       });
   }
-
   // ── Restock Medication ───────────────────────────
   function restockMedication() {
     var successDiv = document.getElementById('restock-success');
     var errorDiv   = document.getElementById('restock-error');
     successDiv.style.display = 'none';
     errorDiv.style.display   = 'none';
-
     var inventory_id  = document.getElementById('restock-slot').value;
     var qty           = document.getElementById('restock-qty').value;
     var expiry        = document.getElementById('restock-expiry').value;
     var staff_id      = document.getElementById('restock-staff').value;
-
     if (!inventory_id || !qty || !expiry) {
       errorDiv.textContent   = 'Please fill in all restock fields.';
       errorDiv.style.display = 'block';
       return;
     }
-
     fetch(API + '/restock', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -684,7 +618,6 @@
       errorDiv.style.display = 'block';
     });
   }
-
   // ── Load everything on page open ─────────────────
   window.onload = function() {
     // Set default restock expiry to 1 year from now
@@ -692,13 +625,11 @@
     d.setFullYear(d.getFullYear() + 1);
     document.getElementById('restock-expiry').value =
       d.toISOString().split('T')[0];
-
     loadStats();
     loadAlerts();
     loadInventory();
     loadTransactions();
   };
-
   // ── Auto refresh every 30 seconds ────────────────
   setInterval(function() {
     loadStats();
@@ -707,6 +638,5 @@
     loadTransactions();
   }, 30000);
 </script>
-
 </body>
 </html>
