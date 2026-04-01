@@ -212,9 +212,9 @@ def dispense_prescription():
               data['machine_id']))
 
         db.commit()
-        send_email(
-            "Medication Dispensed - Medical Vending Mchine",
-         f"A dispense event occurred.\n\nPrescription ID: {data['prescription_id']}\nPatient ID: {data['patient_id']}\nMedication ID: {data['medication_id']}\nQuantity: {data['quantity']}\nTime: {datetime.now()}"
+       send_email(
+    "Medication Dispensed - Medical Vending Machine",
+    "A dispense occurred. Prescription: " + str(data['prescription_id']) + " Patient: " + str(data['patient_id']) + " Medication: " + str(data['medication_id']) + " Qty: " + str(data['quantity'])
 )
         return jsonify({
             "status": "success",
