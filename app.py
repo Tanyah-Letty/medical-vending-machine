@@ -8,10 +8,10 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 # Email config
-SENDER_EMAIL = "tanyahletty01@gmail.com"
-SENDER_PASSWORD = os.environ.get('onfq asdu uteh kdig')
+SENDER_EMAIL = "Lettytanyah01@gmail.com"
+SENDER_PASSWORD = os.environ.get('EMAIL_PASSWORD')
 PHARMACIST_EMAILS = [
-    "lettytanyah01@gmail.com",
+    "tanyahletty01@gmail.com",
     "Staiceymurandu6@gmail.com",
     "Chivimadian@gmail.com"
 ]
@@ -20,14 +20,21 @@ app = Flask(__name__)
 CORS(app)
 
 def get_db():
-   def send_email(subject, body):
+    return mysql.connector.connect(
+        host=os.environ.get('DB_HOST', 'localhost'),
+        port=int(os.environ.get('DB_PORT', 3306)),
+        user=os.environ.get('DB_USER', 'root'),
+        password=os.environ.get('DB_PASSWORD', ''),
+        database=os.environ.get('DB_NAME', 'medical_vending_db')
+    )
+
+def send_email(subject, body):
     try:
         msg = MIMEMultipart()
         msg['From'] = SENDER_EMAIL
         msg['To'] = ", ".join(PHARMACIST_EMAILS)
         msg['Subject'] = subject
         msg.attach(MIMEText(body, 'plain'))
-
         server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
         server.login(SENDER_EMAIL, SENDER_PASSWORD)
         server.sendmail(SENDER_EMAIL, PHARMACIST_EMAILS, msg.as_string())
@@ -35,13 +42,6 @@ def get_db():
         print("Email sent successfully")
     except Exception as e:
         print("Email failed: " + str(e))
-    return mysql.connector.connect(
-         host=os.environ.get('DB_HOST', 'localhost'),
-        port=int(os.environ.get ('DB_PORT', 59246)),
-        user=os.environ.get('DB_USER', 'root'),
-        password=os.environ.get('DB_PASSWORD', ' '),
-        database=os.environ.get ('DB_NAME', 'medical_vending_db')
-    )
 
 @app.route('/verify-rfid/<rfid_uid>', methods=['GET'])
 def verify_rfid(rfid_uid):
@@ -108,16 +108,12 @@ def verify_rfid(rfid_uid):
         else:
             message = "No active prescription found"
 
-        return jsonify({
-            "status": "invalid",
-            "message": message
-        }), 404
+        return jsonify({"status": "invalid", "message": message}), 404
 
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
     finally:
         db.close()
-
 
 @app.route('/verify-barcode/<barcode>', methods=['GET'])
 def verify_barcode(barcode):
@@ -151,15 +147,11 @@ def verify_barcode(barcode):
         result = cursor.fetchone()
         if result:
             return jsonify({"status": "valid", "data": result})
-        return jsonify({
-            "status": "invalid",
-            "message": "Barcode not found or expired"
-        }), 404
+        return jsonify({"status": "invalid", "message": "Barcode not found or expired"}), 404
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
     finally:
         db.close()
-
 
 @app.route('/dispense-prescription', methods=['POST'])
 def dispense_prescription():
@@ -193,38 +185,36 @@ def dispense_prescription():
                     refills_used = %s
                 WHERE prescription_id = %s
             """, (refills_used, data['prescription_id']))
-            print("Prescription fully dispensed")
         else:
             cursor.execute("""
                 UPDATE Prescription
                 SET refills_used = %s
                 WHERE prescription_id = %s
             """, (refills_used, data['prescription_id']))
-            print("Refills remaining: " +
-                  str(rx[0] - refills_used))
 
         cursor.execute("""
             UPDATE Inventory
             SET quantity_available = quantity_available - %s
             WHERE medication_id = %s AND machine_id = %s
-        """, (data['quantity'], data['medication_id'],
-              data['machine_id']))
+        """, (data['quantity'], data['medication_id'], data['machine_id']))
 
         db.commit()
-       send_email(
-    "Medication Dispensed - Medical Vending Machine",
-    "A dispense occurred. Prescription: " + str(data['prescription_id']) + " Patient: " + str(data['patient_id']) + " Medication: " + str(data['medication_id']) + " Qty: " + str(data['quantity'])
-)
-        return jsonify({
-            "status": "success",
-            "message": "Dispensed successfully"
-        })
+
+        send_email(
+            "Medication Dispensed - Medical Vending Machine",
+            "A dispense event occurred.\n\nPrescription ID: " + str(data['prescription_id']) +
+            "\nPatient ID: " + str(data['patient_id']) +
+            "\nMedication ID: " + str(data['medication_id']) +
+            "\nQuantity: " + str(data['quantity']) +
+            "\nTime: " + str(datetime.now())
+        )
+
+        return jsonify({"status": "success", "message": "Dispensed successfully"})
     except Exception as e:
         db.rollback()
         return jsonify({"status": "error", "message": str(e)}), 500
     finally:
         db.close()
-
 
 @app.route('/inventory', methods=['GET'])
 def get_inventory():
@@ -255,7 +245,6 @@ def get_inventory():
     finally:
         db.close()
 
-
 @app.route('/alerts', methods=['GET'])
 def get_alerts():
     db = get_db()
@@ -276,18 +265,22 @@ def get_alerts():
             ORDER BY a.created_at DESC
         """)
         alerts = cursor.fetchall()
-if len(alerts) > 0:
-    alert_list = "\n".join([f"- {a['brand_name']}: {a['current_quantity']} remaining (reorder at {a['reorder_level']})" for a in alerts])
-    send_email(
-        "LOW STOCK ALERT - Medical Vending Machine",
-        f"The following medications need restocking:\n\n{alert_list}\n\nPlease restock as soon as possible."
-    )
-return jsonify(alerts)
+        if len(alerts) > 0:
+            alert_list = "\n".join([
+                "- " + a['brand_name'] + ": " + str(a['current_quantity']) +
+                " remaining (reorder at " + str(a['reorder_level']) + ")"
+                for a in alerts
+            ])
+            send_email(
+                "LOW STOCK ALERT - Medical Vending Machine",
+                "The following medications need restocking:\n\n" + alert_list +
+                "\n\nPlease restock as soon as possible."
+            )
+        return jsonify(alerts)
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
     finally:
         db.close()
-
 
 @app.route('/restock', methods=['POST'])
 def restock():
@@ -343,7 +336,6 @@ def restock():
     finally:
         db.close()
 
-
 @app.route('/stats', methods=['GET'])
 def get_stats():
     db = get_db()
@@ -386,7 +378,6 @@ def get_stats():
     finally:
         db.close()
 
-
 @app.route('/recent-transactions', methods=['GET'])
 def recent_transactions():
     db = get_db()
@@ -413,7 +404,6 @@ def recent_transactions():
     finally:
         db.close()
 
-
 @app.route('/patients', methods=['GET'])
 def get_patients():
     db = get_db()
@@ -429,7 +419,6 @@ def get_patients():
         return jsonify({"status": "error", "message": str(e)}), 500
     finally:
         db.close()
-
 
 @app.route('/doctors', methods=['GET'])
 def get_doctors():
@@ -448,7 +437,6 @@ def get_doctors():
         return jsonify({"status": "error", "message": str(e)}), 500
     finally:
         db.close()
-
 
 @app.route('/prescription-drugs', methods=['GET'])
 def prescription_drugs():
@@ -469,7 +457,6 @@ def prescription_drugs():
         return jsonify({"status": "error", "message": str(e)}), 500
     finally:
         db.close()
-
 
 @app.route('/create-prescription', methods=['POST'])
 def create_prescription():
@@ -517,26 +504,20 @@ def create_prescription():
             WHERE p.barcode = %s
         """, (barcode,))
         prescription = cursor.fetchone()
-        return jsonify({
-            "status": "success",
-            "prescription": prescription
-        })
+        return jsonify({"status": "success", "prescription": prescription})
     except Exception as e:
         db.rollback()
         return jsonify({"status": "error", "message": str(e)}), 500
     finally:
         db.close()
 
-
 @app.route('/doctor-portal')
 def doctor_portal():
     return render_template('doctor_portal.html')
 
-
 @app.route('/dashboard')
 def dashboard():
     return render_template('dashboard.html')
-
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
