@@ -276,7 +276,12 @@ def get_alerts():
                 "The following medications need restocking:\n\n" + alert_list +
                 "\n\nPlease restock as soon as possible."
             )
-        return jsonify(alerts)
+        for alert in alerts:
+    if alert.get('created_at'):
+        alert['created_at'] = str(alert['created_at'])
+    if alert.get('resolved_at'):
+        alert['resolved_at'] = str(alert['resolved_at'])
+         return jsonify(alerts)
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
     finally:
