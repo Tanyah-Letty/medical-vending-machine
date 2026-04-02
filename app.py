@@ -28,13 +28,13 @@ def get_db():
         msg['Subject'] = subject
         msg.attach(MIMEText(body, 'plain'))
 
-        server = smtplib.SMTP('smtp.gmail.com', 465)
+        server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
         server.login(SENDER_EMAIL, SENDER_PASSWORD)
         server.sendmail(SENDER_EMAIL, PHARMACIST_EMAILS, msg.as_string())
         server.quit()
         print("Email sent successfully")
     except Exception as e:
-        print(f"Email failed: {e}")
+        print("Email failed: " + str(e))
     return mysql.connector.connect(
          host=os.environ.get('DB_HOST', 'localhost'),
         port=int(os.environ.get ('DB_PORT', 59246)),
