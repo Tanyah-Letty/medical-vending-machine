@@ -1,3 +1,5 @@
+
+
 from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
 import mysql.connector
@@ -265,6 +267,11 @@ def get_alerts():
             ORDER BY a.created_at DESC
         """)
         alerts = cursor.fetchall()
+        for alert in alerts:
+            if alert.get('created_at'):
+                alert['created_at'] = str(alert['created_at'])
+            if alert.get('resolved_at'):
+                alert['resolved_at'] = str(alert['resolved_at'])
         if len(alerts) > 0:
             alert_list = "\n".join([
                 "- " + a['brand_name'] + ": " + str(a['current_quantity']) +
@@ -276,12 +283,7 @@ def get_alerts():
                 "The following medications need restocking:\n\n" + alert_list +
                 "\n\nPlease restock as soon as possible."
             )
-        for alert in alerts:
-    if alert.get('created_at'):
-        alert['created_at'] = str(alert['created_at'])
-    if alert.get('resolved_at'):
-        alert['resolved_at'] = str(alert['resolved_at'])
-         return jsonify(alerts)
+        return jsonify(alerts)
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
     finally:
@@ -403,7 +405,11 @@ def recent_transactions():
             ORDER BY t.dispensed_at DESC
             LIMIT 15
         """)
-        return jsonify(cursor.fetchall())
+        transactions = cursor.fetchall()
+        for t in transactions:
+            if t.get('dispensed_at'):
+                t['dispensed_at'] = str(t['dispensed_at'])
+        return jsonify(transactions)
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
     finally:
