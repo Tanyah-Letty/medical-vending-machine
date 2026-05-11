@@ -219,12 +219,29 @@ def dispense_prescription():
 
         db.commit()
 
+        # Get names for notification
+        cursor2 = db.cursor(dictionary=True)
+        cursor2.execute("""
+            SELECT pt.first_name, pt.last_name,
+                   m.brand_name, m.dosage_strength
+            FROM Patient pt, Medication m
+            WHERE pt.patient_id = %s AND m.medication_id = %s
+        """, (data['patient_id'], data['medication_id']))
+        info = cursor2.fetchone()
+        name = (info['first_name'] + ' ' + info['last_name']) if info else 'Unknown'
+        drug = (info['brand_name'] + ' ' + info['dosage_strength']) if info else 'Unknown'
+
+        send_telegram(
+            '💊 <b>Medication Dispensed</b>\n' +
+            '👤 Patient: ' + name + '\n' +
+            '💊 Drug: ' + drug + '\n' +
+            '📦 Packs: ' + str(data['quantity']) + '\n' +
+            '🕐 Time: ' + datetime.now().strftime('%H:%M %d/%m/%Y')
+        )
         send_email(
             "Medication Dispensed - Medical Vending Machine",
-            "A dispense event occurred.\n\nPrescription ID: " + str(data['prescription_id']) +
-            "\nPatient ID: " + str(data['patient_id']) +
-            "\nMedication ID: " + str(data['medication_id']) +
-            "\nQuantity: " + str(data['quantity']) +
+            "Patient: " + name + "\nDrug: " + drug +
+            "\nPacks: " + str(data['quantity']) +
             "\nTime: " + str(datetime.now())
         )
 
@@ -463,12 +480,9 @@ def register_patient():
 
         patient_id = cursor.lastrowid
         send_telegram(
-            '🏥 <b>New Patient Registered</b>
-' +
-            '👤 ' + data['first_name'] + ' ' + data['last_name'] + '
-' +
-            '🆔 Hospital ID: ' + hospital_id + '
-' +
+            '🏥 <b>New Patient Registered</b>\n' +
+            '👤 ' + data['first_name'] + ' ' + data['last_name'] + '\n' +
+            '🆔 Hospital ID: ' + hospital_id + '\n' +
             '💳 RFID: ' + data['rfid_uid']
         )
         return jsonify({'status': 'success', 'patient_id': patient_id,
@@ -579,6 +593,14 @@ def create_prescription():
             WHERE p.barcode = %s
         """, (barcode,))
         prescription = cursor.fetchone()
+        send_telegram(
+            '📋 <b>New Prescription Created</b>\n' +
+            '👤 Patient: ' + prescription['first_name'] + ' ' + prescription['last_name'] + '\n' +
+            '💊 Drug: ' + prescription['brand_name'] + ' ' + prescription['dosage_strength'] + '\n' +
+            '📦 Packs: ' + str(prescription['quantity_prescribed']) + '\n' +
+            '👨‍⚕️ Doctor: ' + prescription['doctor_name'] + '\n' +
+            '⏰ Expires: ' + str(prescription['date_expires'])
+        )
         return jsonify({"status": "success", "prescription": prescription})
     except Exception as e:
         db.rollback()
