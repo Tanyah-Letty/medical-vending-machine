@@ -6,6 +6,7 @@ import mysql.connector
 from datetime import datetime
 import os
 import smtplib
+import requests as req
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
@@ -17,6 +18,22 @@ PHARMACIST_EMAILS = [
     "Staiceymurandu6@gmail.com",
     "Chivimadian@gmail.com"
 ]
+
+# Telegram config
+TELEGRAM_TOKEN   = os.environ.get('TELEGRAM_TOKEN', '8600502826:AAFCWpRkSmLBRauHaY49rpjuXlP9t5Cldao')
+TELEGRAM_CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID', '8772493264')
+
+def send_telegram(message):
+    try:
+        url = 'https://api.telegram.org/bot' + TELEGRAM_TOKEN + '/sendMessage'
+        req.post(url, json={
+            'chat_id': TELEGRAM_CHAT_ID,
+            'text': message,
+            'parse_mode': 'HTML'
+        }, timeout=5)
+        print("Telegram sent")
+    except Exception as e:
+        print("Telegram failed: " + str(e))
 
 app = Flask(__name__)
 CORS(app)
@@ -415,6 +432,53 @@ def recent_transactions():
     finally:
         db.close()
 
+@app.route('/register-patient', methods=['POST'])
+def register_patient():
+    data = request.json
+    db = get_db()
+    cursor = db.cursor(dictionary=True)
+    try:
+        # Check if RFID already used
+        cursor.execute(
+            'SELECT patient_id FROM Patient WHERE rfid_uid = %s',
+            (data['rfid_uid'],)
+        )
+        if cursor.fetchone():
+            return jsonify({'status': 'error',
+                'message': 'This RFID card is already assigned to another patient'}), 400
+
+        # Generate hospital ID
+        cursor.execute('SELECT COUNT(*) as total FROM Patient')
+        count = cursor.fetchone()['total']
+        hospital_id = 'HOSP-' + str(count + 1).zfill(4)
+
+        cursor.execute("""
+            INSERT INTO Patient
+            (first_name, last_name, email, hospital_id, rfid_uid, registered_at)
+            VALUES (%s, %s, %s, %s, %s, NOW())
+        """, (data['first_name'], data['last_name'],
+               data.get('email', ''), hospital_id,
+               data['rfid_uid']))
+        db.commit()
+
+        patient_id = cursor.lastrowid
+        send_telegram(
+            '🏥 <b>New Patient Registered</b>
+' +
+            '👤 ' + data['first_name'] + ' ' + data['last_name'] + '
+' +
+            '🆔 Hospital ID: ' + hospital_id + '
+' +
+            '💳 RFID: ' + data['rfid_uid']
+        )
+        return jsonify({'status': 'success', 'patient_id': patient_id,
+                        'hospital_id': hospital_id})
+    except Exception as e:
+        db.rollback()
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+    finally:
+        db.close()
+
 @app.route('/patients', methods=['GET'])
 def get_patients():
     db = get_db()
@@ -422,7 +486,7 @@ def get_patients():
     try:
         cursor.execute("""
             SELECT patient_id, first_name,
-                   last_name, hospital_id
+                   last_name, hospital_id, rfid_uid
             FROM Patient ORDER BY first_name
         """)
         return jsonify(cursor.fetchall())

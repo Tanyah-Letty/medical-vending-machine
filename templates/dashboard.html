@@ -290,20 +290,7 @@
         <p>Prescriptions Today</p>
       </div>
     </div>
-    <div class="stat-card">
-      <div class="stat-icon teal">🛒</div>
-      <div class="stat-info">
-        <h3 id="stat-otc-today">--</h3>
-        <p>OTC Sales Today</p>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon purple">💰</div>
-      <div class="stat-info">
-        <h3 id="stat-revenue">--</h3>
-        <p>OTC Revenue Today</p>
-      </div>
-    </div>
+
   </div>
   <!-- ── ALERTS ── -->
   <div class="card">
@@ -503,9 +490,7 @@
           );
           var barClass = pct > 40 ? 'stock-ok' :
                          pct > 15 ? 'stock-low' : 'stock-critical';
-          var typeTag  = item.drug_type === 'OTC' ?
-            '<span class="tag tag-otc">OTC</span>' :
-            '<span class="tag tag-rx">RX</span>';
+          var typeTag = '<span class="tag tag-rx">RX</span>';
           html +=
             '<tr>' +
               '<td><strong>' + item.slot_number + '</strong></td>' +
@@ -547,13 +532,10 @@
         }
         var html = '';
         txns.forEach(function(t) {
-          var typeTag = t.type === 'OTC' ?
-            '<span class="tag tag-otc">OTC</span>' :
-            '<span class="tag tag-rx">RX</span>';
+          var typeTag = '<span class="tag tag-rx">RX</span>';
           var statusCls = t.status === 'success' ?
             'status-ok' : 'status-fail';
-          var amount = t.type === 'OTC' ?
-            '$' + parseFloat(t.amount_paid).toFixed(2) : '—';
+          var amount = '—';
           html +=
             '<tr>' +
               '<td>' + typeTag + '</td>' +

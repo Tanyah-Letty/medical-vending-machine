@@ -1,155 +1,274 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Doctor Prescription Portal</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.5/JsBarcode.all.min.js"></script>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap');
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --blue: #1a73e8;
+      --blue-dark: #1557b0;
+      --green: #34a853;
+      --red: #d93025;
+      --bg: #f0f4f8;
+      --white: #ffffff;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --muted: #64748b;
+    }
     body {
-      font-family: Arial, sans-serif;
-      background: #f0f4f8;
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
       min-height: 100vh;
+      color: var(--text);
     }
     header {
-      background: #1a73e8;
+      background: var(--blue);
       color: white;
-      padding: 15px 30px;
+      padding: 16px 30px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
-    header h1 { font-size: 22px; }
-    header p  { font-size: 13px; opacity: 0.85; }
+    header h1 { font-size: 20px; font-weight: 600; }
+    header p  { font-size: 12px; opacity: 0.8; margin-top: 2px; }
+
+    /* ── Tab Navigation ── */
+    .tabs {
+      background: white;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      padding: 0 30px;
+    }
+    .tab {
+      padding: 14px 24px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+    }
+    .tab.active {
+      color: var(--blue);
+      border-bottom-color: var(--blue);
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
     .container {
-      max-width: 800px;
-      margin: 30px auto;
+      max-width: 820px;
+      margin: 28px auto;
       padding: 0 20px;
     }
     .card {
       background: white;
-      border-radius: 10px;
-      padding: 30px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-      margin-bottom: 25px;
+      border-radius: 12px;
+      padding: 28px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+      margin-bottom: 22px;
     }
     .card h2 {
-      font-size: 18px;
-      color: #1a73e8;
+      font-family: 'DM Serif Display', serif;
+      font-size: 19px;
+      color: var(--blue);
       margin-bottom: 20px;
-      padding-bottom: 10px;
-      border-bottom: 2px solid #e8f0fe;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
     }
     .form-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 15px;
+      gap: 14px;
     }
     .form-group {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 5px;
     }
-    .form-group.full-width {
-      grid-column: 1 / -1;
-    }
+    .form-group.full { grid-column: 1 / -1; }
     label {
-      font-size: 13px;
-      font-weight: bold;
-      color: #444;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
     select, input, textarea {
       padding: 10px 12px;
-      border: 1px solid #ddd;
-      border-radius: 6px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
       font-size: 14px;
+      font-family: 'DM Sans', sans-serif;
       width: 100%;
       background: #fafafa;
+      color: var(--text);
+      transition: border-color 0.2s;
     }
     select:focus, input:focus, textarea:focus {
       outline: none;
-      border-color: #1a73e8;
+      border-color: var(--blue);
       background: white;
     }
     textarea { resize: vertical; min-height: 70px; }
+
+    /* ── Pack selector ── */
+    .pack-selector {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .pack-selector input[type=number] {
+      width: 80px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 600;
+    }
+    .pack-unit {
+      font-size: 14px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .pack-note {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* ── RFID badge ── */
+    .rfid-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #e8f0fe;
+      color: var(--blue);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+    .rfid-badge.none {
+      background: #fce8e6;
+      color: var(--red);
+    }
+
     .btn {
-      padding: 12px 25px;
+      padding: 11px 22px;
       border: none;
-      border-radius: 6px;
-      font-size: 15px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: 'DM Sans', sans-serif;
       cursor: pointer;
-      font-weight: bold;
+      transition: all 0.2s;
     }
     .btn-primary {
-      background: #1a73e8;
+      background: var(--blue);
       color: white;
       width: 100%;
-      margin-top: 10px;
+      margin-top: 12px;
     }
-    .btn-primary:hover { background: #1557b0; }
-    .btn-print {
-      background: #34a853;
+    .btn-primary:hover { background: var(--blue-dark); }
+    .btn-green {
+      background: var(--green);
       color: white;
-      margin-top: 15px;
+      width: 100%;
+      margin-top: 12px;
     }
+    .btn-green:hover { background: #2d9249; }
+    .btn-print {
+      background: var(--green);
+      color: white;
+      margin-top: 14px;
+    }
+
+    /* ── Result card ── */
     #result-card { display: none; text-align: center; }
-    #result-card h2 { color: #34a853; }
+    #result-card h2 { color: var(--green); }
     .prescription-info {
-      background: #f8f9fa;
-      border-radius: 8px;
-      padding: 15px;
-      margin: 15px 0;
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 16px;
+      margin: 14px 0;
       text-align: left;
     }
     .prescription-info p {
       font-size: 14px;
-      margin-bottom: 6px;
+      margin-bottom: 7px;
       color: #333;
+      display: flex;
+      justify-content: space-between;
     }
-    .prescription-info span {
-      font-weight: bold;
-      color: #1a73e8;
-    }
-    #barcode-container {
-      margin: 20px auto;
+    .prescription-info span { font-weight: 600; color: var(--blue); }
+
+    /* ── RFID display on result ── */
+    .rfid-display {
+      background: #1a73e8;
+      color: white;
+      border-radius: 12px;
       padding: 20px;
-      background: white;
-      border: 2px dashed #1a73e8;
-      border-radius: 8px;
-      display: inline-block;
+      margin: 16px 0;
+      text-align: center;
     }
-    .barcode-label {
-      font-size: 18px;
-      font-weight: bold;
-      color: #333;
-      margin-top: 8px;
+    .rfid-display .rfid-icon { font-size: 36px; margin-bottom: 8px; }
+    .rfid-display .rfid-uid {
+      font-family: monospace;
+      font-size: 22px;
+      font-weight: 700;
       letter-spacing: 3px;
+    }
+    .rfid-display p { font-size: 12px; opacity: 0.8; margin-top: 6px; }
+
+    /* ── Register result ── */
+    #register-result { display: none; }
+    .success-box {
+      background: #e6f4ea;
+      border: 1px solid #34a853;
+      border-radius: 10px;
+      padding: 16px;
+      color: #1e7e34;
+      font-size: 14px;
+      margin-top: 12px;
     }
     .error-msg {
       background: #fce8e6;
-      color: #d93025;
-      padding: 12px;
-      border-radius: 6px;
+      color: var(--red);
+      padding: 11px;
+      border-radius: 8px;
       margin-top: 10px;
       display: none;
-      font-size: 14px;
+      font-size: 13px;
     }
-    @media print {
-      header, .card:first-of-type, .btn-print { display: none; }
-      #result-card { display: block !important; }
-      body { background: white; }
+
+    /* ── Patient RFID info ── */
+    #patient-rfid-info {
+      margin-top: 8px;
+      font-size: 12px;
     }
   </style>
 </head>
 <body>
 <header>
-  <h1>🏥 Doctor Prescription Portal</h1>
-  <p>Medical Vending Machine System</p>
+  <div>
+    <h1>🏥 Doctor Prescription Portal</h1>
+    <p>Medical Vending Machine System</p>
+  </div>
 </header>
+
+<!-- Tabs -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('prescribe')">📋 New Prescription</div>
+  <div class="tab" onclick="switchTab('register')">👤 Register Patient</div>
+</div>
+
+<!-- ══════════════ PRESCRIBE TAB ══════════════ -->
+<div id="tab-prescribe" class="tab-content active">
 <div class="container">
-  <!-- Prescription Form -->
   <div class="card">
-    <h2>📋 Issue New Prescription</h2>
+    <h2>Issue New Prescription</h2>
     <div class="form-grid">
       <div class="form-group">
         <label>Doctor</label>
@@ -159,123 +278,224 @@
       </div>
       <div class="form-group">
         <label>Patient</label>
-        <select id="patient-select">
+        <select id="patient-select" onchange="onPatientChange()">
           <option value="">-- Select Patient --</option>
         </select>
+        <div id="patient-rfid-info"></div>
       </div>
       <div class="form-group">
         <label>Medication</label>
-        <select id="medication-select">
+        <select id="medication-select" onchange="onMedChange()">
           <option value="">-- Select Medication --</option>
         </select>
       </div>
+
+      <!-- Pre-packed quantity -->
       <div class="form-group">
-        <label>Quantity to Dispense</label>
-        <input type="number" id="quantity" placeholder="e.g. 21" min="1">
+        <label>Quantity (Packs / Boxes)</label>
+        <div class="pack-selector">
+          <input type="number" id="quantity" value="1" min="1" max="10">
+          <span class="pack-unit" id="pack-unit-label">pack(s)</span>
+        </div>
+        <div class="pack-note" id="pack-note">
+          Standard pharmacy packaging — e.g. 1 box = 1 blister strip or bottle
+        </div>
       </div>
-      <div class="form-group full-width">
+
+      <div class="form-group full">
         <label>Dosage Instructions</label>
         <textarea id="dosage"
-          placeholder="e.g. Take 1 tablet twice daily after meals">
+          placeholder="e.g. Take 1 capsule twice daily after meals for 7 days">
         </textarea>
       </div>
       <div class="form-group">
         <label>Refills Allowed</label>
-        <input type="number" id="refills" value="0" min="0" max="5">
+        <select id="refills">
+          <option value="0">No refills (single dispense)</option>
+          <option value="1">1 refill</option>
+          <option value="2">2 refills</option>
+          <option value="3">3 refills</option>
+        </select>
       </div>
       <div class="form-group">
         <label>Prescription Expires On</label>
         <input type="date" id="expiry">
       </div>
     </div>
-    <div class="error-msg" id="error-msg"></div>
+    <div class="error-msg" id="rx-error"></div>
     <button class="btn btn-primary" onclick="generatePrescription()">
-      Generate Prescription &amp; Barcode
+      ✅ Generate Prescription
     </button>
   </div>
-  <!-- Barcode Result -->
+
+  <!-- Result -->
   <div class="card" id="result-card">
-    <h2>✅ Prescription Generated Successfully</h2>
+    <h2>✅ Prescription Generated</h2>
     <div class="prescription-info" id="prescription-info"></div>
-    <div id="barcode-container">
-      <svg id="barcode"></svg>
-      <div class="barcode-label" id="barcode-text"></div>
+    <div class="rfid-display" id="rfid-display">
+      <div class="rfid-icon">💳</div>
+      <div class="rfid-uid" id="rfid-uid-display">—</div>
+      <p>Patient taps this card at the vending machine to collect medication</p>
     </div>
-    <br>
-    <button class="btn btn-print" onclick="window.print()">
-      🖨️ Print Barcode for Patient
-    </button>
+    <button class="btn btn-print" onclick="window.print()">🖨️ Print Prescription</button>
   </div>
 </div>
+</div>
+
+<!-- ══════════════ REGISTER TAB ══════════════ -->
+<div id="tab-register" class="tab-content">
+<div class="container">
+  <div class="card">
+    <h2>Register New Patient</h2>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>First Name</label>
+        <input type="text" id="reg-first" placeholder="e.g. Tendai">
+      </div>
+      <div class="form-group">
+        <label>Last Name</label>
+        <input type="text" id="reg-last" placeholder="e.g. Moyo">
+      </div>
+      <div class="form-group full">
+        <label>Email Address (optional)</label>
+        <input type="email" id="reg-email" placeholder="patient@email.com">
+      </div>
+      <div class="form-group full">
+        <label>RFID Card UID</label>
+        <input type="text" id="reg-rfid"
+          placeholder="e.g. A4:32:35:06"
+          style="font-family: monospace; font-size: 16px; letter-spacing: 2px;">
+        <div class="pack-note" style="margin-top:4px;">
+          Scan or type the card UID exactly as it appears (e.g. A4:32:35:06)
+        </div>
+      </div>
+    </div>
+    <div class="error-msg" id="reg-error"></div>
+    <button class="btn btn-green" onclick="registerPatient()">
+      👤 Register Patient & Assign Card
+    </button>
+  </div>
+
+  <div id="register-result"></div>
+</div>
+</div>
+
 <script>
   const API = 'https://medical-vending-machine-api.onrender.com';
-  // ── Set default expiry date (7 days from today) ──
+  var allPatients = [];
+
   window.onload = function() {
-    var expiry = new Date();
-    expiry.setDate(expiry.getDate() + 7);
-    var formatted = expiry.toISOString().split('T')[0];
-    document.getElementById('expiry').value = formatted;
+    var exp = new Date();
+    exp.setDate(exp.getDate() + 7);
+    document.getElementById('expiry').value =
+      exp.toISOString().split('T')[0];
     loadDoctors();
     loadPatients();
     loadMedications();
   };
-  // ── Load Doctors ─────────────────────────────────
+
+  function switchTab(name) {
+    document.querySelectorAll('.tab').forEach(function(t, i) {
+      t.classList.toggle('active',
+        (name === 'prescribe' && i === 0) ||
+        (name === 'register'  && i === 1));
+    });
+    document.getElementById('tab-prescribe').classList.toggle('active', name === 'prescribe');
+    document.getElementById('tab-register').classList.toggle('active', name === 'register');
+  }
+
   function loadDoctors() {
     fetch(API + '/doctors')
-      .then(function(res) { return res.json(); })
-      .then(function(doctors) {
-        var select = document.getElementById('doctor-select');
-        doctors.forEach(function(d) {
-          var option = document.createElement('option');
-          option.value = d.doctor_id;
-          option.textContent = d.full_name + ' - ' + d.specialization;
-          select.appendChild(option);
+      .then(function(r) { return r.json(); })
+      .then(function(docs) {
+        var sel = document.getElementById('doctor-select');
+        docs.forEach(function(d) {
+          var o = document.createElement('option');
+          o.value = d.doctor_id;
+          o.textContent = d.full_name + ' — ' + d.specialization;
+          sel.appendChild(o);
         });
-      })
-      .catch(function(err) {
-        console.error('Failed to load doctors:', err);
       });
   }
-  // ── Load Patients ────────────────────────────────
+
   function loadPatients() {
     fetch(API + '/patients')
-      .then(function(res) { return res.json(); })
-      .then(function(patients) {
-        var select = document.getElementById('patient-select');
-        patients.forEach(function(p) {
-          var option = document.createElement('option');
-          option.value = p.patient_id;
-          option.textContent = p.first_name + ' ' + p.last_name +
-                               ' (' + p.hospital_id + ')';
-          select.appendChild(option);
+      .then(function(r) { return r.json(); })
+      .then(function(pts) {
+        allPatients = pts;
+        var sel = document.getElementById('patient-select');
+        // Clear existing
+        sel.innerHTML = '<option value="">-- Select Patient --</option>';
+        pts.forEach(function(p) {
+          var o = document.createElement('option');
+          o.value = p.patient_id;
+          var rfidTag = p.rfid_uid ? ' ✅' : ' ⚠️ No card';
+          o.textContent = p.first_name + ' ' + p.last_name +
+                          ' (' + p.hospital_id + ')' + rfidTag;
+          sel.appendChild(o);
         });
-      })
-      .catch(function(err) {
-        console.error('Failed to load patients:', err);
       });
   }
-  // ── Load Medications ─────────────────────────────
+
+  function onPatientChange() {
+    var id = document.getElementById('patient-select').value;
+    var info = document.getElementById('patient-rfid-info');
+    if (!id) { info.innerHTML = ''; return; }
+    var pt = allPatients.find(function(p) {
+      return String(p.patient_id) === String(id);
+    });
+    if (!pt) { info.innerHTML = ''; return; }
+    if (pt.rfid_uid) {
+      info.innerHTML = '<span class="rfid-badge">💳 ' + pt.rfid_uid + '</span>';
+    } else {
+      info.innerHTML = '<span class="rfid-badge none">⚠️ No RFID card assigned — register patient first</span>';
+    }
+  }
+
   function loadMedications() {
     fetch(API + '/prescription-drugs')
-      .then(function(res) { return res.json(); })
+      .then(function(r) { return r.json(); })
       .then(function(drugs) {
-        var select = document.getElementById('medication-select');
+        var sel = document.getElementById('medication-select');
         drugs.forEach(function(m) {
-          var option = document.createElement('option');
-          option.value = m.medication_id;
-          option.textContent = m.brand_name + ' ' +
-                               m.dosage_strength + ' - ' + m.dosage_form;
-          select.appendChild(option);
+          var o = document.createElement('option');
+          o.value = m.medication_id;
+          o.setAttribute('data-form', m.dosage_form || '');
+          o.textContent = m.brand_name + ' ' +
+                          m.dosage_strength + ' — ' + m.dosage_form;
+          sel.appendChild(o);
         });
-      })
-      .catch(function(err) {
-        console.error('Failed to load medications:', err);
       });
   }
-  // ── Generate Prescription ────────────────────────
+
+  function onMedChange() {
+    var sel = document.getElementById('medication-select');
+    var opt = sel.options[sel.selectedIndex];
+    var form = opt ? opt.getAttribute('data-form') : '';
+    var label = document.getElementById('pack-unit-label');
+    var note  = document.getElementById('pack-note');
+    // Map dosage form to pack unit
+    var unitMap = {
+      'tablet': 'box(es)', 'capsule': 'box(es)',
+      'syrup': 'bottle(s)', 'liquid': 'bottle(s)',
+      'inhaler': 'inhaler(s)', 'cream': 'tube(s)',
+      'injection': 'vial(s)', 'patch': 'pack(s)'
+    };
+    var unit = 'pack(s)';
+    for (var key in unitMap) {
+      if (form.toLowerCase().indexOf(key) !== -1) {
+        unit = unitMap[key]; break;
+      }
+    }
+    label.textContent = unit;
+    note.textContent = 'Prescribe in standard pharmacy packs — 1 ' +
+      unit.replace('(s)', '') + ' = standard pharmacy unit for this medication';
+  }
+
   function generatePrescription() {
-    var errorDiv = document.getElementById('error-msg');
-    errorDiv.style.display = 'none';
+    var err = document.getElementById('rx-error');
+    err.style.display = 'none';
+
     var doctor_id     = document.getElementById('doctor-select').value;
     var patient_id    = document.getElementById('patient-select').value;
     var medication_id = document.getElementById('medication-select').value;
@@ -283,13 +503,24 @@
     var dosage        = document.getElementById('dosage').value.trim();
     var refills       = document.getElementById('refills').value;
     var expiry        = document.getElementById('expiry').value;
-    // Validate all fields
+
     if (!doctor_id || !patient_id || !medication_id ||
         !quantity || !dosage || !expiry) {
-      errorDiv.textContent = 'Please fill in all fields before generating.';
-      errorDiv.style.display = 'block';
+      err.textContent = 'Please fill in all fields before generating.';
+      err.style.display = 'block';
       return;
     }
+
+    // Warn if patient has no RFID
+    var pt = allPatients.find(function(p) {
+      return String(p.patient_id) === String(patient_id);
+    });
+    if (pt && !pt.rfid_uid) {
+      err.textContent = 'This patient has no RFID card. Register their card first (Register Patient tab).';
+      err.style.display = 'block';
+      return;
+    }
+
     fetch(API + '/create-prescription', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -303,55 +534,98 @@
         date_expires:        expiry
       })
     })
-    .then(function(res) { return res.json(); })
+    .then(function(r) { return r.json(); })
     .then(function(data) {
       if (data.status === 'success') {
-        showBarcode(data.prescription);
+        showResult(data.prescription, pt);
       } else {
-        errorDiv.textContent = 'Error: ' + data.message;
-        errorDiv.style.display = 'block';
+        err.textContent = 'Error: ' + data.message;
+        err.style.display = 'block';
       }
     })
-    .catch(function(err) {
-      errorDiv.textContent =
-        'Cannot connect to server. Make sure Flask is running.';
-      errorDiv.style.display = 'block';
+    .catch(function() {
+      err.textContent = 'Cannot connect to server.';
+      err.style.display = 'block';
     });
   }
-  // ── Show Barcode ─────────────────────────────────
-  function showBarcode(p) {
-    JsBarcode('#barcode', p.barcode, {
-      format: 'CODE128',
-      width: 2.5,
-      height: 80,
-      displayValue: false
-    });
-    document.getElementById('barcode-text').textContent = p.barcode;
-    // Format dates cleanly
-    function formatDate(dateStr) {
-      var d = new Date(dateStr);
-      return d.toLocaleDateString('en-GB', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric'
+
+  function showResult(p, pt) {
+    function fmt(d) {
+      return new Date(d).toLocaleDateString('en-GB', {
+        day: 'numeric', month: 'short', year: 'numeric'
       });
     }
+    var packUnit = document.getElementById('pack-unit-label').textContent;
     document.getElementById('prescription-info').innerHTML =
-      '<p>🔖 <span>Barcode:</span> ' + p.barcode + '</p>' +
-      '<p>👤 <span>Patient:</span> ' + p.first_name + ' ' +
-          p.last_name + ' (' + p.hospital_id + ')</p>' +
-      '<p>💊 <span>Medication:</span> ' + p.brand_name +
-          ' ' + p.dosage_strength + '</p>' +
-      '<p>📋 <span>Instructions:</span> ' +
-          p.dosage_instructions + '</p>' +
-      '<p>🔢 <span>Quantity:</span> ' +
-          p.quantity_prescribed + ' units</p>' +
-      '<p>👨‍⚕️ <span>Doctor:</span> ' + p.doctor_name + '</p>' +
-      '<p>📅 <span>Issued:</span> ' + formatDate(p.date_issued) + '</p>' +
-      '<p>⏰ <span>Expires:</span> ' + formatDate(p.date_expires) + '</p>';
+      '<p>👤 Patient <span>' + p.first_name + ' ' + p.last_name + ' (' + p.hospital_id + ')</span></p>' +
+      '<p>💊 Medication <span>' + p.brand_name + ' ' + p.dosage_strength + '</span></p>' +
+      '<p>📦 Quantity <span>' + p.quantity_prescribed + ' ' + packUnit + '</span></p>' +
+      '<p>📋 Instructions <span>' + p.dosage_instructions + '</span></p>' +
+      '<p>👨‍⚕️ Doctor <span>' + p.doctor_name + '</span></p>' +
+      '<p>📅 Issued <span>' + fmt(p.date_issued) + '</span></p>' +
+      '<p>⏰ Expires <span>' + fmt(p.date_expires) + '</span></p>';
+
+    // Show RFID
+    var rfid = pt ? pt.rfid_uid : '—';
+    document.getElementById('rfid-uid-display').textContent = rfid || '—';
+
     document.getElementById('result-card').style.display = 'block';
-    document.getElementById('result-card').scrollIntoView({
-      behavior: 'smooth'
+    document.getElementById('result-card').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // ── Register Patient ──
+  function registerPatient() {
+    var err = document.getElementById('reg-error');
+    err.style.display = 'none';
+
+    var first = document.getElementById('reg-first').value.trim();
+    var last  = document.getElementById('reg-last').value.trim();
+    var email = document.getElementById('reg-email').value.trim();
+    var rfid  = document.getElementById('reg-rfid').value.trim().toUpperCase();
+
+    if (!first || !last || !rfid) {
+      err.textContent = 'First name, last name and RFID card UID are required.';
+      err.style.display = 'block';
+      return;
+    }
+
+    fetch(API + '/register-patient', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        first_name: first,
+        last_name:  last,
+        email:      email,
+        rfid_uid:   rfid
+      })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var res = document.getElementById('register-result');
+      if (data.status === 'success') {
+        res.innerHTML =
+          '<div class="success-box">' +
+          '✅ <strong>' + first + ' ' + last + '</strong> registered successfully!<br>' +
+          '🆔 Hospital ID: <strong>' + data.hospital_id + '</strong><br>' +
+          '💳 RFID Card: <strong>' + rfid + '</strong><br><br>' +
+          'Patient can now receive prescriptions and use their card at the vending machine.' +
+          '</div>';
+        res.style.display = 'block';
+        // Reset form
+        document.getElementById('reg-first').value = '';
+        document.getElementById('reg-last').value  = '';
+        document.getElementById('reg-email').value = '';
+        document.getElementById('reg-rfid').value  = '';
+        // Refresh patient list for prescribe tab
+        loadPatients();
+      } else {
+        err.textContent = data.message || 'Registration failed.';
+        err.style.display = 'block';
+      }
+    })
+    .catch(function() {
+      err.textContent = 'Cannot connect to server.';
+      err.style.display = 'block';
     });
   }
 </script>
